@@ -15,20 +15,18 @@ fun main() {
 
         when (userChoice) {
             1 -> while (true) {
-                val notLearnedList = dictionary.map { it.correctAnswersCount }
-                if (notLearnedList.all { it >= CORRECT_ANSWERS }) {
-                    println("Все слова выучены!")
+                val notLearnedList = dictionary.filter { it.correctAnswersCount < CORRECT_ANSWERS }
+                if (notLearnedList.isEmpty()) {
+                    println("Все слова выучены! \n")
                     break
                 }
-                println()
 
                 val countLearn = dictionary.filter { it.correctAnswersCount < CORRECT_ANSWERS }
-
                 val shuffledWords = countLearn.shuffled().take(WORDS_COUNT)
                 val correctAnswers = shuffledWords.random()
 
-                val questionWords = shuffledWords.mapIndexed { index, word3 ->
-                    "${index + 1} - ${word3.translate}"
+                val questionWords = shuffledWords.mapIndexed { index, word ->
+                    "${index + 1} - ${word.translate}"
                 }.joinToString("\n", "${correctAnswers.original}\n", "\n\n0 - меню")
 
                 println(questionWords)
