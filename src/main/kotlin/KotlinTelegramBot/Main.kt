@@ -32,6 +32,17 @@ fun main() {
                 println(questionWords)
 
                 val userAnswerInput = readln().toIntOrNull()
+                val currentAnswerId = shuffledWords.indexOf(correctAnswers)
+
+                if (userAnswerInput == 0) {
+                    break
+                } else if (userAnswerInput?.minus(1) == currentAnswerId) {
+                    println("Правильно\n")
+                    correctAnswers.correctAnswersCount++
+                    saveDictionary(dictionary)
+                } else {
+                    println("Неправильно! ${correctAnswers.original} это ${correctAnswers.translate}\n")
+                }
             }
 
             2 -> {
@@ -49,6 +60,20 @@ fun main() {
             }
         }
     }
+}
+
+fun saveDictionary(dictionary: MutableList<Word>) {
+
+    val file = File("words.txt")
+
+    file.writeText("")
+
+    for (word in dictionary) {
+
+        file.appendText("${word.original}|${word.translate}|${word.correctAnswersCount}")
+
+    }
+
 }
 
 fun loadDictionary(): MutableList<Word> {
