@@ -1,57 +1,52 @@
 package org.example.KotlinTelegramBot
 
-import java.io.File
+data class Word(val original: String, val translate: String, var correctAnswersCount: Int = 0)
+
+
+fun Question.asConsoleString(): String {
+    val variants = this.variants
+        .mapIndexed { index: Int, word: Word -> " ${index + 1} - ${word.translate}" }
+        .joinToString("\n")
+    return this.correctAnswer.original + "\n" + variants + "\n 0 - выйти в меню"
+}
 
 fun main() {
-    val dictionary = loadDictionary()
+
+    val trainer = LearnWordsTrainer()
 
     while (true) {
         println("Меню:")
-        println("1 - Учить слова\n" +
-                "2 - Статистика\n" +
-                "0 - Выход")
+        println("1 - Учить слова, 2 - Статистика, 0 - Выход")
 
         val userChoice = readln().toIntOrNull()
 
         when (userChoice) {
             1 -> while (true) {
-                val notLearnedList = dictionary.filter { it.correctAnswersCount < CORRECT_ANSWERS }
-                if (notLearnedList.isEmpty()) {
-                    println("Все слова выучены! \n")
+                val question = trainer.getNextQuestion()
+                if (question == null) {
+                    println("Все слова выучены!")
                     break
-                }
-
-                val countLearn = dictionary.filter { it.correctAnswersCount < CORRECT_ANSWERS }
-                val shuffledWords = countLearn.shuffled().take(WORDS_COUNT)
-                val correctAnswers = shuffledWords.random()
-
-                val questionWords = shuffledWords.mapIndexed { index, word ->
-                    "${index + 1} - ${word.translate}"
-                }.joinToString("\n", "${correctAnswers.original}\n", "\n\n0 - меню")
-
-                println(questionWords)
-
-                val userAnswerInput = readln().toIntOrNull()
-                val currentAnswerId = shuffledWords.indexOf(correctAnswers)
-
-                if (userAnswerInput == 0) {
-                    break
-                } else if (userAnswerInput?.minus(1) == currentAnswerId) {
-                    println("Правильно\n")
-                    correctAnswers.correctAnswersCount++
-                    saveDictionary(dictionary)
                 } else {
-                    println("Неправильно! ${correctAnswers.original} это ${correctAnswers.translate}\n")
+                    println(question.asConsoleString())
+                }
+                val userAnswerInput = readln().toIntOrNull()
+                if (userAnswerInput == 0) break
+
+                if (trainer.checkAnswer(userAnswerInput?.minus(1))) {
+                    println("Правильно\n")
+                } else {
+                    println("Неправильно! ${question.correctAnswer.original} " +
+                            "это ${question.correctAnswer.translate}\\n\"")
                 }
             }
 
             2 -> {
-                val totalCount = dictionary.size
-                val wordLearned = dictionary.count { it.correctAnswersCount >= CORRECT_ANSWERS }
-                val percent = (wordLearned.toDouble() / totalCount) * 100
+                val statistics = trainer.getStatistics()
 
-                println("Выбран пункт: Статистика\n" +
-                        "Выучено $wordLearned из $totalCount слов | ${percent.toInt()}%\n")
+                println(
+                    "Выбран пункт: Статистика\n" +
+                            "Выучено ${statistics.wordLearned} из ${statistics.totalCount}| ${statistics.percent}%\n"
+                )
             }
 
             0 -> return
@@ -61,40 +56,6 @@ fun main() {
         }
     }
 }
-
-fun saveDictionary(dictionary: MutableList<Word>) {
-
-    val file = File("words.txt")
-
-    file.writeText("")
-
-    for (word in dictionary) {
-
-        file.appendText("${word.original}|${word.translate}|${word.correctAnswersCount}")
-
-    }
-
-}
-
-fun loadDictionary(): MutableList<Word> {
-
-    val dictionary: MutableList<Word> = mutableListOf()
-    val file = File("words.txt")
-    file.createNewFile()
-
-    val list: List<String> = file.readLines()
-    for (line in list) {
-        val splitLines = line.split("|")
-
-        val correctAnswer: Int = splitLines.getOrNull(2)?.toIntOrNull() ?: 0
-
-        val word = Word(original = splitLines[0], translate = splitLines[1], correctAnswer)
-        dictionary.add(word)
-    }
-    return dictionary
-}
-
-data class Word(val original: String, val translate: String, var correctAnswersCount: Int = 0)
 
 const val CORRECT_ANSWERS = 3
 const val WORDS_COUNT = 4

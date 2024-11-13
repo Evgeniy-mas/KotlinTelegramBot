@@ -1,4 +1,4 @@
 apple|яблоко|0
 bear|медведь|0
-winter|ветер|0
+winter|зима|0
 speed|скорость|0
