@@ -3,8 +3,8 @@ package org.example.kotlinTelegramBot
 import java.io.File
 
 class Statistics(
-    val totalCount: Int,
-    val wordLearned: Int,
+    val learned: Int,
+    val total: Int,
     val percent: Int
 )
 
@@ -13,24 +13,31 @@ data class Question(
     val correctAnswer: Word
 )
 
-class LearnWordsTrainer {
+class LearnWordsTrainer(private val currentAnswerCount: Int = 3, private val countOfQuestionWords: Int = 4) {
     private var question: Question? = null
     private val dictionary = loadDictionary()
 
     fun getStatistics(): Statistics {
+        val learned = dictionary.filter { it.correctAnswersCount >= currentAnswerCount }.size
+        val total = dictionary.size
+        val percent = learned * 100 / total
 
-        val totalCount = dictionary.size
-        val wordLearned = dictionary.count { it.correctAnswersCount >= CORRECT_ANSWERS }
-        val percent = (wordLearned / totalCount) * 100
-
-        return Statistics(totalCount, wordLearned, percent)
+        return Statistics(learned, total, percent)
     }
 
     fun getNextQuestion(): Question? {
 
-        val notLearnedList = dictionary.filter { it.correctAnswersCount < CORRECT_ANSWERS }
+        val notLearnedList = dictionary.filter { it.correctAnswersCount < currentAnswerCount }
         if (notLearnedList.isEmpty()) return null
-        val shuffledWords = notLearnedList.shuffled().take(WORDS_COUNT)
+
+        val shuffledWords = if (notLearnedList.size < countOfQuestionWords) {
+            val learnedList = dictionary.filter { it.correctAnswersCount >= currentAnswerCount }.shuffled()
+            notLearnedList.shuffled().take(countOfQuestionWords) +
+                    learnedList.take(countOfQuestionWords - notLearnedList.size)
+        } else {
+            notLearnedList.shuffled().take(countOfQuestionWords)
+        }.shuffled()
+
         val correctAnswers = shuffledWords.random()
 
         question = Question(
@@ -54,22 +61,25 @@ class LearnWordsTrainer {
     }
 
     private fun loadDictionary(): MutableList<Word> {
-        val dictionary: MutableList<Word> = mutableListOf()
-        val file = File("words.txt")
-        file.createNewFile()
+        try {
+            val dictionary: MutableList<Word> = mutableListOf()
+            val file = File("words.txt")
+            file.createNewFile()
 
-        val list: List<String> = file.readLines()
-        for (line in list) {
-            val splitLines = line.split("|")
+            val list: List<String> = file.readLines()
+            for (line in list) {
+                val splitLines = line.split("|")
 
-            val correctAnswer: Int = splitLines.getOrNull(2)?.toIntOrNull() ?: 0
+                val correctAnswer: Int = splitLines.getOrNull(2)?.toIntOrNull() ?: 0
 
-            val word = Word(original = splitLines[0], translate = splitLines[1], correctAnswer)
-            dictionary.add(word)
+                val word = Word(original = splitLines[0], translate = splitLines[1], correctAnswer)
+                dictionary.add(word)
+            }
+            return dictionary
+        } catch (e: IndexOutOfBoundsException) {
+            throw IllegalStateException("Некорректный файл")
         }
-        return dictionary
     }
-
 
     private fun saveDictionary(dictionary: MutableList<Word>) {
         val file = File("words.txt")
