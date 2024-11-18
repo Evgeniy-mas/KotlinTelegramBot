@@ -76,7 +76,7 @@ class LearnWordsTrainer {
         file.writeText("")
 
         for (word in dictionary) {
-            file.appendText("${word.original}|${word.translate}|${word.correctAnswersCount}")
+            file.appendText("${word.original}|${word.translate}|${word.correctAnswersCount}\n")
         }
     }
 }
