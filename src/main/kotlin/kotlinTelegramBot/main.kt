@@ -9,6 +9,7 @@ fun Question.asConsoleString(): String {
     return this.correctAnswer.original + "\n" + variants + "\n 0 - выйти в меню"
 }
 
+
 fun main() {
 
     val trainer = try {

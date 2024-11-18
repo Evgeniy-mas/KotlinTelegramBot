@@ -86,7 +86,7 @@ class LearnWordsTrainer(private val currentAnswerCount: Int = 3, private val cou
         file.writeText("")
 
         for (word in dictionary) {
-            file.appendText("${word.original}|${word.translate}|${word.correctAnswersCount}")
+            file.appendText("${word.original}|${word.translate}|${word.correctAnswersCount}\n")
         }
     }
 }
