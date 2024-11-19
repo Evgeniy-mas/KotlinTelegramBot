@@ -1,6 +1,5 @@
 package org.example.kotlinTelegramBot
 
-
 data class Word(val original: String, val translate: String, var correctAnswersCount: Int = 0)
 
 fun Question.asConsoleString(): String {
@@ -10,9 +9,15 @@ fun Question.asConsoleString(): String {
     return this.correctAnswer.original + "\n" + variants + "\n 0 - выйти в меню"
 }
 
+
 fun main() {
 
-    val trainer = LearnWordsTrainer()
+    val trainer = try {
+        LearnWordsTrainer(3, 4)
+    } catch (e: Exception) {
+        println("Невозможно загрузить словарь")
+        return
+    }
 
     while (true) {
         println("Меню:")
@@ -35,8 +40,9 @@ fun main() {
                 if (trainer.checkAnswer(userAnswerInput?.minus(1))) {
                     println("Правильно\n")
                 } else {
-                    println("Неправильно! ${question.correctAnswer.original} " +
-                            "это ${question.correctAnswer.translate}\\n\"")
+                    println(
+                        "Неправильно! ${question.correctAnswer.original} " +
+                                "это ${question.correctAnswer.translate}\n")
                 }
             }
 
@@ -45,7 +51,7 @@ fun main() {
 
                 println(
                     "Выбран пункт: Статистика\n" +
-                            "Выучено ${statistics.wordLearned} из ${statistics.totalCount}| ${statistics.percent}%\n"
+                            "Выучено ${statistics.learned} из ${statistics.total}| ${statistics.percent}%\n"
                 )
             }
 
@@ -57,5 +63,4 @@ fun main() {
     }
 }
 
-const val CORRECT_ANSWERS = 3
-const val WORDS_COUNT = 4
+
