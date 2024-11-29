@@ -37,7 +37,7 @@ fun main(args: Array<String>) {
         if (text == "/start".lowercase()) {
             telegram.sendMenu(chatId)
         }
-        if (data?.lowercase() == "statistics_clicked") {
+        if (data?.lowercase() == STATISTICS_BUTTON) {
             telegram.sendMessage(chatId, "Все слова выучены!")
         }
     }
