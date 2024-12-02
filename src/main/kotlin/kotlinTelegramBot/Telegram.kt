@@ -7,6 +7,9 @@ fun main(args: Array<String>) {
     val updateIdRegex: Regex = "\"update_id\":(\\d+)".toRegex()
     val messageTextRegex: Regex = "\"text\":\"(.+?)\"".toRegex()
     val messageAnswerRegex: Regex = "\"chat\":\\{\"id\":(\\d+)".toRegex()
+    val dataRegex: Regex = "\"data\":\"(.+?)\"".toRegex()
+
+    val trainer = LearnWordsTrainer()
 
     while (true) {
         Thread.sleep(2000)
@@ -26,8 +29,16 @@ fun main(args: Array<String>) {
         val matchResultMessage: MatchResult? = messageAnswerRegex.find(updates)
         val chatId = matchResultMessage?.groups?.get(1)?.value ?: continue
 
+        val data = dataRegex.find(updates)?.groups?.get(1)?.value
+
         if (text == "Hello".lowercase()) {
-            telegram.sendMessage(chatId,"Hello")
+            telegram.sendMessage(chatId, "Hello")
+        }
+        if (text == "/start".lowercase()) {
+            telegram.sendMenu(chatId)
+        }
+        if (data?.lowercase() == STATISTICS_BUTTON) {
+            telegram.sendMessage(chatId, "Все слова выучены!")
         }
     }
 }

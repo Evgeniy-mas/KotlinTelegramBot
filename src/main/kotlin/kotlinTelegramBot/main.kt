@@ -1,6 +1,6 @@
 package org.example.kotlinTelegramBot
 
-data class Word(val original: String, val translate: String, var correctAnswersCount: Int = 0)
+
 
 fun Question.asConsoleString(): String {
     val variants = this.variants

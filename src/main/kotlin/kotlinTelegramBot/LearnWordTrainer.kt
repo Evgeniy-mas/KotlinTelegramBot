@@ -2,6 +2,11 @@ package org.example.kotlinTelegramBot
 
 import java.io.File
 
+data class Word(
+    val original: String,
+    val translate: String,
+    var correctAnswersCount: Int = 0)
+
 class Statistics(
     val learned: Int,
     val total: Int,
