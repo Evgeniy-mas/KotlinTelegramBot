@@ -9,7 +9,7 @@ fun main(args: Array<String>) {
     val messageAnswerRegex: Regex = "\"chat\":\\{\"id\":(\\d+)".toRegex()
     val dataRegex: Regex = "\"data\":\"(.+?)\"".toRegex()
 
-    val trainer = LearnWordsTrainer().getStatistics()
+    val trainer = LearnWordsTrainer()
 
     while (true) {
         Thread.sleep(2000)
@@ -38,8 +38,9 @@ fun main(args: Array<String>) {
             telegram.sendMenu(chatId)
         }
         if (data?.lowercase() == STATISTICS_BUTTON) {
+            val statistic = trainer.getStatistics()
             telegram.sendMessage(chatId, "Выбран пункт: Статистика\n" +
-                    "Выучено ${trainer.learned} слов из ${trainer.total}| ${trainer.percent}%\n")
+                    "Выучено ${statistic.learned} слов из ${statistic.total}| ${statistic.percent}%\n")
         }
     }
 }
