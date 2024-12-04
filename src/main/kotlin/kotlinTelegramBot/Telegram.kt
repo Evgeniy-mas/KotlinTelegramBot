@@ -38,7 +38,9 @@ fun main(args: Array<String>) {
             telegram.sendMenu(chatId)
         }
         if (data?.lowercase() == STATISTICS_BUTTON) {
-            telegram.sendMessage(chatId, "Все слова выучены!")
+            val statistic = trainer.getStatistics()
+            telegram.sendMessage(chatId, "Выбран пункт: Статистика\n" +
+                    "Выучено ${statistic.learned} слов из ${statistic.total}| ${statistic.percent}%\n")
         }
     }
 }
