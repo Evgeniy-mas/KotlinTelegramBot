@@ -1,5 +1,7 @@
 package org.example.kotlinTelegramBot
 
+import jdk.swing.interop.DispatcherWrapper
+import org.example.Lesson_test.list
 import java.net.URI
 import java.net.URLEncoder
 import java.net.http.HttpClient
@@ -59,58 +61,63 @@ class TelegramBotService(private val botToken: String) {
 
 
     fun sendQuestion(question: Question, chatId: String): String? {
-val index = question.variants.mapIndexed { index, _ ->
-    CALLBACK_DATA_ANSWER_PREFIX + index
-}
+
+        val variantsString = question.variants.mapIndexed { index, word ->
+            """
+            {"chat_id":$chatId,
+            "text": "${question.correctAnswer.original}",
+            "reply_markup": {"inline_keyboard":
+            [
+            [
+                {
+                "text":"${word.translate}",
+                "callback_data":"$CALLBACK_DATA_ANSWER_PREFIX${index}"
+                }
+                 ]]}}
+                """.trimIndent()
+        }.joinToString(",")
+
+
         val sendMessage = "$API_TELEGRAM$botToken/sendMessage"
+
         val sendQuestion = """
             {"chat_id":$chatId,
             "text": "${question.correctAnswer.original}",
-            "reply_markup": {"inline_keyboard": 
+            "reply_markup": {"inline_keyboard":
             [
             [
              {
              "text": "${question.variants.map { it.translate }[0]}",
-             "callback_data": "$index"
+             "callback_data": "$CALLBACK_DATA_ANSWER_PREFIX"
              },
              {
              "text": "${question.variants.map { it.translate }[1]}",
-             "callback_data": "$index"
+             "callback_data": "$CALLBACK_DATA_ANSWER_PREFIX"
              }
              ],
              [{
              "text": "${question.variants.map { it.translate }[2]}",
-             "callback_data": "$index"
+             "callback_data": "$CALLBACK_DATA_ANSWER_PREFIX"
              },
              {
              "text": "${question.variants.map { it.translate }[3]}",
-             "callback_data": "$index"
+             "callback_data": "$CALLBACK_DATA_ANSWER_PREFIX"
              }
            ]
          ]
-       }            
+       }
      }
 
 """.trimIndent()
 
         val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(sendMessage))
             .header("Content-Type", "application/json")
-            .POST(HttpRequest.BodyPublishers.ofString(sendQuestion))
+            .POST(HttpRequest.BodyPublishers.ofString(variantsString))
             .build()
         val response: HttpResponse<String> = client.send(request, HttpResponse.BodyHandlers.ofString())
         return response.body()
     }
 }
-
-
-
-
-
-
-
-
-
-
 
 const val API_TELEGRAM = "https://api.telegram.org/bot"
 const val STATISTICS_BUTTON = "statistics_clicked"
