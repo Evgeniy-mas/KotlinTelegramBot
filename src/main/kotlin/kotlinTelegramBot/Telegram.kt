@@ -48,14 +48,12 @@ fun main(args: Array<String>) {
         if (data?.lowercase() == LEARN_WORDS_CLICKED) {
             checkNextQuestionAndSend(trainer, telegramBotService, chatId)
         }
+        else if (data?.lowercase() == BACK_TO_MENU) {
+            telegram.sendMenu(chatId)
+        }
 
     }
 }
-
-
-
-
-
 
 fun checkNextQuestionAndSend(
     trainer: LearnWordsTrainer,
