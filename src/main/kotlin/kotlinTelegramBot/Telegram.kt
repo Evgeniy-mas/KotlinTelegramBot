@@ -47,26 +47,40 @@ fun main(args: Array<String>) {
         }
         if (data?.lowercase() == LEARN_WORDS_CLICKED) {
             checkNextQuestionAndSend(trainer, telegramBotService, chatId)
-        }
-        else if (data?.lowercase() == BACK_TO_MENU) {
+        } else if (data?.lowercase() == BACK_TO_MENU) {
             telegram.sendMenu(chatId)
         }
 
+        if (data?.lowercase()?.startsWith(CALLBACK_DATA_ANSWER_PREFIX) == true) {
+            val userAnswerIndex = data.substringAfter("_").toInt()
+            if (trainer.checkAnswer(userAnswerIndex)) {
+                telegramBotService.sendMessage(chatId, "Правильно!")
+                checkNextQuestionAndSend(trainer, telegramBotService, chatId)
+            } else {
+                val questionOriginal = trainer.question?.correctAnswer?.original
+                val correctAnswer = trainer.question?.correctAnswer?.translate
+                telegramBotService.sendMessage(
+                    chatId, "Неправильно! " +
+                            "$questionOriginal это $correctAnswer."
+                )
+                checkNextQuestionAndSend(trainer, telegramBotService, chatId)
+            }
+        }
     }
 }
 
 fun checkNextQuestionAndSend(
     trainer: LearnWordsTrainer,
     telegramBotService: TelegramBotService,
-    chatId: String, )
-{
+    chatId: String,
+) {
     val question = trainer.getNextQuestion()
     if (question == null) {
-        telegramBotService.sendMessage(chatId,"Все слова выучены!")
+        telegramBotService.sendMessage(chatId, "Все слова выучены!")
+    } else {
+        telegramBotService.sendQuestion(question, chatId)
     }
-    else {
-        telegramBotService.sendQuestion(question,chatId)}
-    }
+}
 
 
 
