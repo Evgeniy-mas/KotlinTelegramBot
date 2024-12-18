@@ -7,7 +7,8 @@ import java.io.File
 data class Word(
     val original: String,
     val translate: String,
-    var correctAnswersCount: Int = 0)
+    var correctAnswersCount: Int = 0
+)
 
 class Statistics(
     val learned: Int,
@@ -20,7 +21,11 @@ data class Question(
     val correctAnswer: Word
 )
 
-class LearnWordsTrainer(private val currentAnswerCount: Int = 3, private val countOfQuestionWords: Int = 4) {
+class LearnWordsTrainer(
+    private val fileName: String = "words.txt",
+    private val currentAnswerCount: Int = 3,
+    private val countOfQuestionWords: Int = 4
+) {
     var question: Question? = null
     private val dictionary = loadDictionary()
 
@@ -59,7 +64,7 @@ class LearnWordsTrainer(private val currentAnswerCount: Int = 3, private val cou
             val currentAnswerId = it.variants.indexOf(it.correctAnswer)
             if (currentAnswerId == userAnswerIndex) {
                 it.correctAnswer.correctAnswersCount++
-                saveDictionary(dictionary)
+                saveDictionary()
                 true
             } else {
                 false
@@ -69,8 +74,12 @@ class LearnWordsTrainer(private val currentAnswerCount: Int = 3, private val cou
 
     private fun loadDictionary(): MutableList<Word> {
         try {
+            val file = File(fileName)
+            if (!file.exists()) {
+                File("words.txt").copyTo(file)
+            }
             val dictionary: MutableList<Word> = mutableListOf()
-            val file = File("words.txt")
+
             file.createNewFile()
 
             val list: List<String> = file.readLines()
@@ -88,13 +97,18 @@ class LearnWordsTrainer(private val currentAnswerCount: Int = 3, private val cou
         }
     }
 
-    private fun saveDictionary(dictionary: MutableList<Word>) {
-        val file = File("words.txt")
+    private fun saveDictionary() {
+        val file = File(fileName)
         file.writeText("")
 
         for (word in dictionary) {
             file.appendText("${word.original}|${word.translate}|${word.correctAnswersCount}\n")
         }
+    }
+
+    fun resetProgress() {
+        dictionary.forEach { it.correctAnswersCount = 0 }
+        saveDictionary()
     }
 }
 
