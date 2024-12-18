@@ -1,7 +1,5 @@
 package org.example.kotlinTelegramBot
 
-
-
 fun Question.asConsoleString(): String {
     val variants = this.variants
         .mapIndexed { index: Int, word: Word -> " ${index + 1} - ${word.translate}" }
@@ -9,11 +7,10 @@ fun Question.asConsoleString(): String {
     return this.correctAnswer.original + "\n" + variants + "\n 0 - выйти в меню"
 }
 
-
 fun main() {
 
     val trainer = try {
-        LearnWordsTrainer(3, 4)
+        LearnWordsTrainer(currentAnswerCount = 3, countOfQuestionWords = 4)
     } catch (e: Exception) {
         println("Невозможно загрузить словарь")
         return
@@ -42,7 +39,8 @@ fun main() {
                 } else {
                     println(
                         "Неправильно! ${question.correctAnswer.original} " +
-                                "это ${question.correctAnswer.translate}\n")
+                                "это ${question.correctAnswer.translate}\n"
+                    )
                 }
             }
 
